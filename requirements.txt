@@ -4,4 +4,3 @@ networkx
 scikit-learn
 flask
 joblib
-gunicorn
