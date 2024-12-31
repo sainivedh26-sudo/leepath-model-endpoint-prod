@@ -4,3 +4,6 @@ networkx
 scikit-learn
 flask
 joblib
+pydantic
+fastapi
+uvicorn
