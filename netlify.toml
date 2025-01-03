@@ -1,11 +1,14 @@
-# netlify.toml
 [build]
-  command = "pip install -r netlify/functions/recommend/requirements.txt -t netlify/functions/recommend/"
+  command = """
+    cd netlify/functions/recommend && 
+    pip install -r requirements.txt -t . &&
+    rm -rf *.dist-info __pycache__
+  """
   publish = "."
 
 [functions]
   directory = "netlify/functions"
-  external_node_modules = []
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/api/*"
@@ -13,5 +16,4 @@
   status = 200
 
 [build.environment]
-  AWS_LAMBDA_JS_RUNTIME = "nodejs16.x"
   PYTHON_VERSION = "3.9"
