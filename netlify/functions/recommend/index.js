@@ -1,4 +1,4 @@
-const { spawnSync } = require('child_process');
+const { PythonShell } = require('python-shell');
 const path = require('path');
 
 exports.handler = async (event, context) => {
@@ -23,43 +23,47 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // Execute Python script
-    const pythonPath = path.join(__dirname, 'recommend.py');
-    const process = spawnSync('python3', [pythonPath], {
-      input: JSON.stringify({
+    const options = {
+      mode: 'text',
+      pythonPath: '/opt/buildhome/.python/bin/python3',
+      pythonOptions: ['-u'],
+      scriptPath: __dirname,
+      args: [JSON.stringify({
         body: event.body,
         httpMethod: event.httpMethod
-      }),
-      encoding: 'utf-8',
+      })]
+    };
+
+    return new Promise((resolve, reject) => {
+      PythonShell.run('recommend.py', options, (err, results) => {
+        if (err) {
+          console.error('Error executing Python script:', err);
+          resolve({
+            statusCode: 500,
+            body: JSON.stringify({ error: 'Internal server error' }),
+          });
+          return;
+        }
+
+        try {
+          const result = JSON.parse(results[results.length - 1]);
+          resolve({
+            statusCode: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            },
+            body: JSON.stringify(result),
+          });
+        } catch (e) {
+          console.error('Python script output:', results);
+          resolve({
+            statusCode: 500,
+            body: JSON.stringify({ error: 'Invalid response from model' }),
+          });
+        }
+      });
     });
-
-    if (process.error) {
-      console.error('Error executing Python script:', process.error);
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'Internal server error' }),
-      };
-    }
-
-    // Parse Python output
-    try {
-      const result = JSON.parse(process.stdout);
-      return {
-        statusCode: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify(result),
-      };
-    } catch (e) {
-      console.error('Python script output:', process.stdout);
-      console.error('Python script error:', process.stderr);
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'Invalid response from model' }),
-      };
-    }
   } catch (error) {
     console.error('Function error:', error);
     return {
