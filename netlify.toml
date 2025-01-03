@@ -1,13 +1,11 @@
 [build]
-  command = """
-    cd netlify/functions/recommend && npm install && \
-    pip install -r requirements.txt -t .
-  """
+  command = "pip install -r netlify/functions/recommend/requirements.txt -t netlify/functions/recommend/"
   publish = "."
 
 [functions]
   directory = "netlify/functions"
-  node_bundler = "esbuild"
+  external_node_modules = []
+  included_files = ["netlify/functions/recommend/model_prod.pkl"]
 
 [[redirects]]
   from = "/api/*"
@@ -15,5 +13,5 @@
   status = 200
 
 [build.environment]
+  AWS_LAMBDA_JS_RUNTIME = "nodejs16.x"
   PYTHON_VERSION = "3.9"
-  NODE_VERSION = "16"
