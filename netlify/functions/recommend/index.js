@@ -25,7 +25,7 @@ exports.handler = async (event, context) => {
   try {
     const options = {
       mode: 'text',
-      pythonPath: '/opt/buildhome/.python/bin/python3',
+      pythonPath: 'python3',
       pythonOptions: ['-u'],
       scriptPath: __dirname,
       args: [JSON.stringify({
@@ -40,7 +40,7 @@ exports.handler = async (event, context) => {
           console.error('Error executing Python script:', err);
           resolve({
             statusCode: 500,
-            body: JSON.stringify({ error: 'Internal server error' }),
+            body: JSON.stringify({ error: 'Internal server error', details: err.message }),
           });
           return;
         }
