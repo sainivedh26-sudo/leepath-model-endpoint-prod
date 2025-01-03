@@ -1,7 +1,11 @@
 import json
 import os
+import requests
+import tempfile
 from recommender import QuestionRecommender
 import joblib
+
+MODEL_URL = "https://storage.googleapis.com/model-host/model_prod.pkl"
 
 def handler(event, context):
     """AWS Lambda handler function for question recommendations"""
@@ -40,10 +44,22 @@ def handler(event, context):
         input_questions = body['questions']
         num_recommendations = body.get('num_recommendations', 8)
         
-        # Initialize recommender
+        # Download and load model
         try:
-            model_path = os.path.join(os.path.dirname(__file__), "model_prod.pkl")
-            recommender = joblib.load(model_path)
+            with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+                print("Downloading model from GCS...")
+                response = requests.get(MODEL_URL, stream=True)
+                response.raise_for_status()
+                for chunk in response.iter_content(chunk_size=8192):
+                    tmp_file.write(chunk)
+                tmp_file.flush()
+                
+                print("Loading model...")
+                recommender = joblib.load(tmp_file.name)
+
+            # Clean up temporary file
+            os.unlink(tmp_file.name)
+            
         except Exception as e:
             return {
                 'statusCode': 500,
@@ -57,6 +73,7 @@ def handler(event, context):
             }
 
         # Get recommendations
+        print("Getting recommendations...")
         predictions = recommender.recommend_questions(input_questions, num_recommendations)
         
         return {
