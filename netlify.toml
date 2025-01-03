@@ -1,11 +1,10 @@
 [build]
-  publish = "public"  # This directory will contain any static assets
-  command = ""  # No build command needed for pure functions
+  command = ""
+  publish = "."  # Use root directory since we don't have static assets
 
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["numpy", "pandas", "networkx", "scikit-learn", "joblib"]
 
 [[redirects]]
   from = "/api/*"
