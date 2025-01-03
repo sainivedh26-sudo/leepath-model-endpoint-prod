@@ -1,7 +1,6 @@
 import json
 import os
 import joblib
-import sys
 from recommender import QuestionRecommender
 
 def handler(event, context):
