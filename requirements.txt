@@ -1,9 +1,5 @@
-numpy
-pandas
-networkx
-scikit-learn
-flask
-joblib
-pydantic
-fastapi
-uvicorn
+numpy==1.24.3
+pandas==2.0.2
+networkx==3.1
+scikit-learn==1.2.2
+joblib==1.2.0
