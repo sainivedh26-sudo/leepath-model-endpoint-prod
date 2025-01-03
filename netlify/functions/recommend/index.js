@@ -1,4 +1,4 @@
-const { PythonShell } = require('python-shell');
+const { spawn } = require('child_process');
 const path = require('path');
 
 exports.handler = async (event, context) => {
@@ -22,53 +22,89 @@ exports.handler = async (event, context) => {
     };
   }
 
-  try {
-    const options = {
-      mode: 'text',
-      pythonPath: 'python3',
-      pythonOptions: ['-u'],
-      scriptPath: __dirname,
-      args: [JSON.stringify({
+  return new Promise((resolve, reject) => {
+    try {
+      const pythonProcess = spawn('python3', [
+        path.join(__dirname, 'recommend.py')
+      ]);
+
+      let outputData = '';
+      let errorData = '';
+
+      // Send input data to Python script
+      pythonProcess.stdin.write(JSON.stringify({
         body: event.body,
         httpMethod: event.httpMethod
-      })]
-    };
+      }));
+      pythonProcess.stdin.end();
 
-    return new Promise((resolve, reject) => {
-      PythonShell.run('recommend.py', options, (err, results) => {
-        if (err) {
-          console.error('Error executing Python script:', err);
+      // Collect output data
+      pythonProcess.stdout.on('data', (data) => {
+        outputData += data.toString();
+      });
+
+      // Collect error data
+      pythonProcess.stderr.on('data', (data) => {
+        errorData += data.toString();
+      });
+
+      // Handle process completion
+      pythonProcess.on('close', (code) => {
+        if (code !== 0) {
+          console.error('Python process error:', errorData);
           resolve({
             statusCode: 500,
-            body: JSON.stringify({ error: 'Internal server error', details: err.message }),
+            body: JSON.stringify({ 
+              error: 'Internal server error',
+              details: errorData
+            })
           });
           return;
         }
 
         try {
-          const result = JSON.parse(results[results.length - 1]);
+          const result = JSON.parse(outputData);
           resolve({
             statusCode: 200,
             headers: {
               'Content-Type': 'application/json',
               'Access-Control-Allow-Origin': '*',
             },
-            body: JSON.stringify(result),
+            body: JSON.stringify(result)
           });
         } catch (e) {
-          console.error('Python script output:', results);
+          console.error('Failed to parse Python output:', outputData);
           resolve({
             statusCode: 500,
-            body: JSON.stringify({ error: 'Invalid response from model' }),
+            body: JSON.stringify({ 
+              error: 'Invalid response from model',
+              details: e.message 
+            })
           });
         }
       });
-    });
-  } catch (error) {
-    console.error('Function error:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Server error' }),
-    };
-  }
+
+      // Handle process errors
+      pythonProcess.on('error', (error) => {
+        console.error('Failed to start Python process:', error);
+        resolve({
+          statusCode: 500,
+          body: JSON.stringify({ 
+            error: 'Failed to start Python process',
+            details: error.message 
+          })
+        });
+      });
+
+    } catch (error) {
+      console.error('Function error:', error);
+      resolve({
+        statusCode: 500,
+        body: JSON.stringify({ 
+          error: 'Server error',
+          details: error.message 
+        })
+      });
+    }
+  });
 };
