@@ -1,9 +1,9 @@
 {
-    "name": "recommend-function",
-    "version": "1.0.0",
-    "description": "Question recommender function",
-    "main": "index.js",
-    "dependencies": {
-      "child_process": "^1.0.2"
-    }
+  "name": "recommend-function",
+  "version": "1.0.0",
+  "description": "Question recommender function",
+  "main": "index.js",
+  "dependencies": {
+    "python-shell": "^3.0.1"
   }
+}
