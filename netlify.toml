@@ -1,3 +1,4 @@
+# netlify.toml
 [build]
   command = "pip install -r netlify/functions/recommend/requirements.txt -t netlify/functions/recommend/"
   publish = "."
@@ -5,7 +6,6 @@
 [functions]
   directory = "netlify/functions"
   external_node_modules = []
-  included_files = ["netlify/functions/recommend/model_prod.pkl"]
 
 [[redirects]]
   from = "/api/*"
