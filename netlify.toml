@@ -1,5 +1,5 @@
 [build]
-  command = "cp model_prod.pkl netlify/functions/recommend/ && cp recommender.py netlify/functions/recommend/"
+  command = ""  # No build command needed since files are already in place
   publish = "."
 
 [functions]
