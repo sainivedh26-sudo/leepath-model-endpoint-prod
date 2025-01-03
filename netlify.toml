@@ -1,9 +1,5 @@
 [build]
-  command = """
-    curl -L https://raw.githubusercontent.com/netlify/build-image/focal/packages/python.sh | sh && \
-    export PATH="/opt/buildhome/.python/bin:$PATH" && \
-    pip install -r netlify/functions/recommend/requirements.txt -t netlify/functions/recommend/
-  """
+  command = "pip install -r netlify/functions/recommend/requirements.txt -t netlify/functions/recommend/"
   publish = "."
 
 [functions]
