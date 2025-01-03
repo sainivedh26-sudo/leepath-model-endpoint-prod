@@ -1,9 +1,13 @@
 [build]
-  command = ""  # No build command needed since files are already in place
+  command = """
+    chmod +x netlify/functions/recommend/recommend.py && \
+    pip install -r netlify/functions/recommend/requirements.txt -t netlify/functions/recommend/
+  """
   publish = "."
 
 [functions]
   directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/api/*"
