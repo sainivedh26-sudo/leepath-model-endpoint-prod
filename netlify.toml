@@ -1,10 +1,9 @@
 [build]
-  command = ""
-  publish = "."  # Use root directory since we don't have static assets
+  command = "cp model_prod.pkl netlify/functions/recommend/ && cp recommender.py netlify/functions/recommend/"
+  publish = "."
 
 [functions]
   directory = "netlify/functions"
-  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/api/*"
